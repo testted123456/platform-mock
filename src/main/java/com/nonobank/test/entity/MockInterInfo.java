@@ -8,16 +8,16 @@ import javax.validation.Valid;
  * Created by H.W. on 2018/4/11.
  */
 public class MockInterInfo {
-    private String url;
-    private String appName;
-    private String interfaceName;
-    private String desc;
-    private JSONObject request;
-    private JSONObject response;
-    private String resType;
+    private String env;      //接口路径
+    private String appName;   //mock名称
+    private String interfaceName;   //接口名称
+    private String desc;    //接口描述
+    private JSONObject request;   //请求内容
+    private JSONObject response;   //响应内容
+    private String resType;      //响应格式，可设置为xml，默认json
     private String rules;
-    private String methodType;
-    private Config config;
+    private String methodType;   //接口请求类型
+    private Config config;      //接口配置信息
 
     public Config getConfig() {
         return config;
@@ -37,12 +37,12 @@ public class MockInterInfo {
         this.methodType = methodType;
     }
 
-    public String getUrl() {
-        return url;
+    public String getEnv() {
+        return env;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setEnv(String env) {
+        this.env = env;
     }
 
     public String getAppName() {

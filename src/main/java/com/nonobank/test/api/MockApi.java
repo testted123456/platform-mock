@@ -2,18 +2,21 @@ package com.nonobank.test.api;
 
 import com.alibaba.fastjson.JSONObject;
 import com.nonobank.test.biz.AssembleResponse;
+import com.nonobank.test.biz.ProcessConfig;
 import com.nonobank.test.commons.MockException;
 import com.nonobank.test.entity.Code;
+import com.nonobank.test.entity.Config;
 import com.nonobank.test.entity.ResponseResult;
 import com.nonobank.test.utils.*;
-import j.m.XMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 
 /**
@@ -25,7 +28,9 @@ public class MockApi {
     private static Logger logger = LoggerFactory.getLogger(MockApi.class);
 
     @Autowired
-    Extract extract;
+    ProcessConfig processConfig;
+    @Autowired
+    Config config;
     @Autowired
     AssembleResponse assembleResponse;
     private String env = "stb";
@@ -34,14 +39,21 @@ public class MockApi {
 
 
     @RequestMapping(value = "/**")
-    public String assembleRes(HttpServletRequest servletRequest){
-        String res =null;
+    public String assembleRes(HttpServletRequest servletRequest, HttpServletResponse response) {
+        String res = null;
+        String message = null;
+        int delayTime = 0;
+
         try {
-           res = assembleResponse.getMockResponse(servletRequest);
+            if (!config.isEmpty()) {
+                processConfig.process(config, response);
+            }
+            res = assembleResponse.getMockResponse(servletRequest, response);
 
         } catch (MockException e) {
             e.printStackTrace();
-            return JSONObject.toJSONString(ResponseResult.error(Code.Res.UNKNOWN_ERROR,e.getMessage()));
+            String str = JSONObject.toJSONString(ResponseResult.error(Code.Res.UNKNOWN_ERROR, e.getMessage()));
+            return str;
         }
         return res;
     }
@@ -106,27 +118,27 @@ public class MockApi {
 
     }*/
 
-   /* private String getBodyData(HttpServletRequest request) {
-        StringBuffer data = new StringBuffer();
-        String line = null;
-        BufferedReader reader = null;
-        try {
-            reader = request.getReader();
-            while (null != (line = reader.readLine()))
-                data.append(line);
-        } catch (IOException e) {
-        } finally {
-        }
-        return data.toString();
-    }
-*/
+    /* private String getBodyData(HttpServletRequest request) {
+         StringBuffer data = new StringBuffer();
+         String line = null;
+         BufferedReader reader = null;
+         try {
+             reader = request.getReader();
+             while (null != (line = reader.readLine()))
+                 data.append(line);
+         } catch (IOException e) {
+         } finally {
+         }
+         return data.toString();
+     }
+ */
     private String getResStrByPath(String path, String reqBody) {
         String result = null;
         try {
             result = FileResource.getResource(path);
             if (result != null) {
-             //   MockInterInfo interfaceInfo = convert.transInterface(result,false);
-              //  String string = extract.getResponse(reqBody, interfaceInfo.getResponse().toJSONString(), interfaceInfo.getResType());
+                //   MockInterInfo interfaceInfo = convert.transInterface(result,false);
+                //  String string = extract.getResponse(reqBody, interfaceInfo.getResponse().toJSONString(), interfaceInfo.getResType());
                 return "";
             }
         } catch (MockException e) {

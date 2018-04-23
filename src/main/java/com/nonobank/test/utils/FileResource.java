@@ -17,9 +17,13 @@ public class FileResource {
         return getDirpath(prePath, "", appName, interName);
     }
 
+    public static String getDirpath(String prePath, String relaPath) {
+        return prePath + separator + relaPath + ".json";
+    }
+
     public static String getDirpath(String absolute_path, String env, String appName, String interName) {
         String temp = interName.replace(separator, "_");
-        String dirpath = absolute_path + env + separator + appName + separator + temp + ".json";
+        String dirpath = absolute_path + separator + env + separator + appName + separator + temp + ".json";
         return dirpath;
     }
 
@@ -119,7 +123,7 @@ public class FileResource {
     }
 
     private static String getStringFromInputStream(InputStream input) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(input) );
+        BufferedReader br = new BufferedReader(new InputStreamReader(input));
         StringBuilder sb = new StringBuilder();
         String line;
         while ((line = br.readLine()) != null) {

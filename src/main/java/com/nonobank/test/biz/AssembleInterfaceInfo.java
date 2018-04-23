@@ -1,12 +1,17 @@
 package com.nonobank.test.biz;
 
 import com.alibaba.fastjson.JSONObject;
+import com.nonobank.test.api.Mock;
 import com.nonobank.test.commons.MockException;
 import com.nonobank.test.entity.MockInterInfo;
 import com.nonobank.test.entity.URI;
+import com.nonobank.test.utils.FileResource;
+import com.nonobank.test.utils.PathUtil;
 import com.nonobank.test.utils.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -17,6 +22,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class AssembleInterfaceInfo {
+    @Value("${prePath}")
+    String prePath;
+
+    @Autowired
+    PathUtil pathUtil;
+
 
     private static Logger logger = LoggerFactory.getLogger(AssembleInterfaceInfo.class);
 
@@ -26,7 +37,7 @@ public class AssembleInterfaceInfo {
             throw new MockException("setInterface请求内容不能为空");
         }
         JSONObject obj = JSONObject.parseObject(json);
-        setPathInfo(obj);
+        parsePathInfo(obj);
         setFieldValue(obj, "request");
         setFieldValue(obj, "response");
         MockInterInfo mockInterInfo = JSONObject.parseObject(obj.toJSONString(), MockInterInfo.class);
@@ -46,6 +57,9 @@ public class AssembleInterfaceInfo {
      */
     private void setFieldValue(JSONObject obj, String str) throws MockException {
         String request = obj.getString(str);
+        if (str.equalsIgnoreCase("config") && request == null) {
+            return;
+        }
         if (StringUtils.isEmpty(request)) {
             throw new MockException(str + "字段必须存在且不能为空");
         }
@@ -68,7 +82,7 @@ public class AssembleInterfaceInfo {
      * @param jsonObject
      * @throws MockException
      */
-    private void setPathInfo(JSONObject jsonObject) throws MockException {
+    private void parsePathInfo(JSONObject jsonObject) throws MockException {
         String url = jsonObject.getString("url");
         if (StringUtils.isEmpty(url)) {
             throw new MockException("url字段必须存在且不能为空");
@@ -79,4 +93,16 @@ public class AssembleInterfaceInfo {
         jsonObject.put("interfaceName", uri.interfaceName);
     }
 
+    public MockInterInfo setInterfaceConfig(String json) throws MockException {
+        JSONObject jsonObject = JSONObject.parseObject(json);
+        String relative = pathUtil.getRelativePath(jsonObject.getString("url"));
+        String filePath = pathUtil.getFilePath(relative);
+        String str = FileResource.getResource(filePath);
+        if (str==null){
+            throw new MockException("为找到符合路径"+filePath+"的资源");
+        }
+        JSONObject jsonObject1 = JSONObject.parseObject(str);
+        jsonObject1.putAll(jsonObject);
+        return JSONObject.parseObject(jsonObject1.toJSONString(), MockInterInfo.class);
+    }
 }

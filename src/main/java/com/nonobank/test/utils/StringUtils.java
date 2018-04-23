@@ -7,6 +7,8 @@ import com.nonobank.test.commons.MockException;
  * Created by H.W. on 2018/4/10.
  */
 public class StringUtils extends org.springframework.util.StringUtils {
+
+
     public static String preJudge(String string) throws MockException {
         if (org.springframework.util.StringUtils.isEmpty(string)) {
             throw new MockException(Code.NOTNULL.getDes());
@@ -36,18 +38,6 @@ public class StringUtils extends org.springframework.util.StringUtils {
         }
         return count;
     }
-
-/*
-    public static TwoTuple getTuple(String str, String split) {
-        String[] strings = StringUtils.split(str, split);
-        TwoTuple<String, String> twoTuple = new TwoTuple<>(strings[0], strings[1]);
-        return twoTuple;
-    }
-
-*/
-
-
-
 
     public static String[] split(String string, String split) {
         return split(string, split, 2);

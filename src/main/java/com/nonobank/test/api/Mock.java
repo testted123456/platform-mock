@@ -28,7 +28,7 @@ public class Mock {
     @Autowired
     AssembleInterfaceInfo assembleInterfaceInfo;
     @Value("${prePath}")
-    String prePath;
+    String prefixPath;
 
     /**
      * @param {String} url  被mock接口请求地址，例:/usr-app/auth/getUserId,usr-app即mock模拟的第三方服务名，剩余部分为接口名
@@ -37,7 +37,7 @@ public class Mock {
      * @param {String} desc       被mock接口功能描述
      * @param {String} [resType] 可选,响应返回类型，默认为json(功能暂未实现)
      * @return
-     * @api {POST} /mock/setNewInterface   新增mock接口
+     * @api {POST} /mock/setInterface   新增mock接口
      * @apiGroup mock
      * @apiParamExample {json} Request-Example
      * {
@@ -76,7 +76,7 @@ public class Mock {
         }
 
         try {
-            FileResource.createFile(prePath,"", mockInterInfo.getAppName(), mockInterInfo.getInterfaceName(), result);
+            FileResource.createFile(prefixPath,"", mockInterInfo.getAppName(), mockInterInfo.getInterfaceName(), result);
         } catch (MockException e) {
             e.printStackTrace();
             return ResponseResult.error(Code.Res.UNKNOWN_ERROR, e.getMessage());
@@ -110,35 +110,29 @@ public class Mock {
         return result;
     }
 
-    @RequestMapping(value = "/getConfig", method = RequestMethod.POST)
-    public ResponseResult<String> getConfig(@RequestBody String config) {
-        ResponseResult<String> result = null;
-        JSONObject obj = JSONObject.parseObject(config);
-        if (obj.containsKey("isGlobal") && obj.getBoolean("isGlobal")) {
-            //todo
-        }
-        if (obj.containsKey("interfaceName")) {
-            //todo
-
-        }
-
-        return result;
-    }
 
     @RequestMapping(value = "/setConfig",method = RequestMethod.POST)
-    public ResponseResult<String> setConfig(@RequestBody String config) {
-        ResponseResult<String> result = null;
-        JSONObject obj = JSONObject.parseObject(config);
-        if (obj.containsKey("isGlobal") && obj.getBoolean("isGlobal")) {
-            //todo
+    public ResponseResult<String> setConfig(@RequestBody String request)  {
+       String result = null;
+        MockInterInfo mockInterInfo = null;
+        try {
+            mockInterInfo = assembleInterfaceInfo.setInterfaceConfig(request);
+        } catch (MockException e) {
+            e.printStackTrace();
+            logger.error(e.getMessage());
+            return ResponseResult.error(Code.Res.VALID_ERROR, e.getMessage());
         }
-        if (obj.containsKey("interfaceName")) {
-            //todo
+         result = JSONObject.toJSONString(mockInterInfo);
 
+        try {
+            FileResource.createFile(prefixPath,mockInterInfo.getEnv(), mockInterInfo.getAppName(), mockInterInfo.getInterfaceName(), result);
+        } catch (MockException e) {
+            e.printStackTrace();
+            return ResponseResult.error(Code.Res.UNKNOWN_ERROR, e.getMessage());
         }
 
-        return result;
+        return ResponseResult.success("success", mockInterInfo.getInterfaceName() + "Config保存成功，对应环境："+mockInterInfo.getEnv());
     }
 
 
-}
+    }

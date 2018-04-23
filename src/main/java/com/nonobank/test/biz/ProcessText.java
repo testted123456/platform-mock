@@ -48,7 +48,6 @@ public class ProcessText {
         }
         return new JSONObject(map);
     }
-
     /**
      * 将XMl格式文档转换为Map
      * @param str
@@ -68,9 +67,6 @@ public class ProcessText {
     public static JSONObject fromJsonStr(String str){
         return JSONObject.parseObject(str);
     }
-
-
-
 
     private static Map<String, Object> getMap(String str, String key) throws MockException {
         org.json.JSONObject jsonObject = DataConvert.getJSONObject(str);

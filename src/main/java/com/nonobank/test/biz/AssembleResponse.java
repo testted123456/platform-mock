@@ -2,6 +2,7 @@ package com.nonobank.test.biz;
 
 import com.alibaba.fastjson.JSONObject;
 import com.nonobank.test.commons.MockException;
+import com.nonobank.test.entity.Config;
 import com.nonobank.test.entity.MockInterInfo;
 import com.nonobank.test.entity.URI;
 import com.nonobank.test.utils.Extract;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 
@@ -33,6 +35,8 @@ public class AssembleResponse {
     @Value("${prePath}")
     String prePath;
 
+    @Autowired
+    ProcessConfig processConfig;
     private String requestURL;
     private String reqMethodType;
     private String contentType;
@@ -43,21 +47,30 @@ public class AssembleResponse {
     private String reqStr;
 
 
-    public String getMockResponse(HttpServletRequest servletRequest) throws MockException {
+    public String getMockResponse(HttpServletRequest servletRequest, HttpServletResponse res) throws MockException {
         String response = null;
-        parseRequest(servletRequest);
-        if (filePath != null) {
-            MockInterInfo mockInterInfo = getInfoFromFile(filePath);
-            if (mockInterInfo == null) {
-                return reqStr;
-            }
-            JSONObject originRes = getOriginResponse(mockInterInfo);
-            response = extract.getResponse(reqParams, originRes, resDataType == null ? "json" : resDataType);
+        MockInterInfo mockInterInfo = getMockInterfaceByfile(servletRequest);
+        if (mockInterInfo == null) {
+            return reqStr;
         }
-
+        if (mockInterInfo.getConfig() !=null){
+            processConfig.process(mockInterInfo.getConfig(),res);
+        }
+        JSONObject originRes = getOriginResponse(mockInterInfo);
+        response = extract.getResponse(reqParams, originRes, resDataType == null ? "json" : resDataType);
         return response;
     }
-    
+
+
+    private MockInterInfo getMockInterfaceByfile(HttpServletRequest servletRequest) throws MockException {
+        MockInterInfo mockInterInfo = null;
+        parseRequest(servletRequest);
+        if (filePath != null) {
+            mockInterInfo = getInfoFromFile(filePath);
+        }
+        return mockInterInfo;
+    }
+
     /**
      * 解析请求数据
      *
@@ -76,7 +89,7 @@ public class AssembleResponse {
         } else {
             throw new MockException("当前不支持contentType类型" + reqMethodType);
         }
-        logger.info("请求接口为: "+requestURL+",请求参数为："+reqParams.toPrettyJSON());
+        logger.info("请求接口为: " + requestURL + ",请求参数为：" + reqParams.toPrettyJSON());
         parseFilePath(requestURL);
     }
 
@@ -84,10 +97,10 @@ public class AssembleResponse {
         if (StringUtils.isEmpty(requestURL)) {
             throw new MockException("mock请求中接口路径不存在");
         }
-        URI<String, String, String> uri = ProcessPath.getURI(requestURL);
-        filePath = FileResource.getDirpath(prePath,uri.env, uri.appName, uri.interfaceName);
+        URI uri = ProcessPath.getURI(requestURL);
+        filePath = FileResource.getDirpath(prePath, uri.env, uri.appName, uri.interfaceName);
         if ("stb".equalsIgnoreCase(uri.env) || "sit".equalsIgnoreCase(uri.env)) {
-            originFilePath = FileResource.getDirpath(prePath,"", uri.appName, uri.interfaceName);
+            originFilePath = FileResource.getDirpath(prePath, "", uri.appName, uri.interfaceName);
         }
         return filePath;
     }
@@ -103,12 +116,14 @@ public class AssembleResponse {
     private MockInterInfo getInfoFromFile(String filePath) throws MockException {
         String interStr = null;
         interStr = FileResource.getResource(filePath);
-        if (interStr == null&&originFilePath!=null) {
+        if (interStr == null && originFilePath != null) {
             interStr = FileResource.getResource(originFilePath);
-            FileResource.copyFile(originFilePath,filePath);
+            FileResource.copyFile(originFilePath, filePath);
         }
         return interStr == null ? null : JSONObject.parseObject(interStr, MockInterInfo.class);
     }
+
+
 
 
     public String getBodyData(HttpServletRequest request) {
@@ -123,7 +138,7 @@ public class AssembleResponse {
         } finally {
         }
 
-       // str = DataConvert.getJsonStr(str);
+        // str = DataConvert.getJsonStr(str);
         return data.toString();
     }
 

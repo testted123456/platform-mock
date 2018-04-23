@@ -71,7 +71,7 @@ public class Extract {
 
 
     /**
-     * 将Map
+     * 将嵌套的map转换为深度为1的map
      *
      * @param map
      * @param targetMap
@@ -108,6 +108,12 @@ public class Extract {
         }
     }
 
+    /**
+     * 将嵌套的map转换为深度为1的map,处理map中的list类型数据
+     * @param list
+     * @param targetMap
+     * @param keyPrex
+     */
     private void traversal(List<Object> list, Map<String, Object> targetMap, String keyPrex) {
         if (list == null) {
             return;

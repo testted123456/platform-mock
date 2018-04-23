@@ -19,23 +19,22 @@ public class ProcessPath {
     private static final String MOCK_SELF = "web-mock";
 
     /**
-     * 分解请求URI
-     *
+     * 分解请求URI,转换为接口的相关数据
      * @param str
      * @return
      */
     public static URI getURI(String str) throws MockException {
         logger.info("待处理mock接口请求路径为:" + str);
-        URI<String, String, String> uri = null;
+        URI uri = null;
         str = preprocessPath(str);
         if (canTrans(str)) {
             str = delSlash(str);
             if (containsEnv(str)) {
                 String[] strings = str.split(SLASH, 3);
-                uri = new URI<>(strings[0], strings[1], strings[2]);
+                uri = new URI(strings[0], strings[1], strings[2]);
             } else {
                 String[] strings = str.split(SLASH, 2);
-                uri = new URI<>("", strings[0], strings[1]);
+                uri = new URI("", strings[0], strings[1]);
             }
         }else {
             throw new MockException(str+"不能正常解析为MockName+InterfaceName");
