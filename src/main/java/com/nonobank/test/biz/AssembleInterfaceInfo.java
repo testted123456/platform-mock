@@ -40,6 +40,7 @@ public class AssembleInterfaceInfo {
         parsePathInfo(obj);
         setFieldValue(obj, "request");
         setFieldValue(obj, "response");
+        setFieldValue(obj,"config");
         MockInterInfo mockInterInfo = JSONObject.parseObject(obj.toJSONString(), MockInterInfo.class);
         if (mockInterInfo == null) {
             throw new MockException("setInterface请求内容转换为InterfaceInfo实例失败");
@@ -57,7 +58,7 @@ public class AssembleInterfaceInfo {
      */
     private void setFieldValue(JSONObject obj, String str) throws MockException {
         String request = obj.getString(str);
-        if (str.equalsIgnoreCase("config") && request == null) {
+        if (str.equalsIgnoreCase("config") && StringUtils.isEmpty(request)) {
             return;
         }
         if (StringUtils.isEmpty(request)) {
