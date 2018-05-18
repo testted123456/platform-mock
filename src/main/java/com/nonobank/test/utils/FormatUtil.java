@@ -3,7 +3,6 @@ package com.nonobank.test.utils;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,7 +11,7 @@ import java.util.Map;
 /**
  * Created by H.W. on 2018/4/12.
  */
-public class FormatUtil  extends j.m.XML{
+public class FormatUtil extends j.m.XML {
     private final static String[] toolsresultItems = {
 //                                "envValue",
 //                                "name",
@@ -115,7 +114,6 @@ public class FormatUtil  extends j.m.XML{
             sb.append('\t');
         }
     }
-
 
 
 }

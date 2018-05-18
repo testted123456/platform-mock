@@ -1,18 +1,13 @@
 package com.nonobank.test.entity;
 
 import com.nonobank.test.utils.StringUtils;
-import org.omg.CORBA.PUBLIC_MEMBER;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.annotation.Validated;
-
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.executable.ValidateOnExecution;
 
 /**
- * Created by H.W. on 2018/4/11.
+ * Created by H.W. on 2018/4/25.
  */
+
 @Component
 @ConfigurationProperties(prefix = "config")
 public class Config {
@@ -53,6 +48,6 @@ public class Config {
             return true;
 
         }
-    return false;
+        return false;
     }
 }

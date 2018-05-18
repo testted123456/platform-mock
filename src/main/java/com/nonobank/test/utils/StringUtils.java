@@ -1,50 +1,55 @@
 package com.nonobank.test.utils;
 
-import com.nonobank.test.commons.Code;
-import com.nonobank.test.commons.MockException;
+import com.nonobank.test.entity.Position;
+import com.nonobank.test.entity.Type;
 
 /**
- * Created by H.W. on 2018/4/10.
+ * Created by H.W. on 2018/4/24.
  */
 public class StringUtils extends org.springframework.util.StringUtils {
-
-
-    public static String preJudge(String string) throws MockException {
-        if (org.springframework.util.StringUtils.isEmpty(string)) {
-            throw new MockException(Code.NOTNULL.getDes());
-        }
-        String str = string.trim();
-        if (!str.startsWith("{") && !str.startsWith("<")) {
-            throw new MockException(Code.NOT_JSON_OR_XML.getDes() + ",输入字串：" + string);
-        }
-        return str;
-    }
-
-    /**
-     * 统计字符出现次数
-     *
-     * @param string
-     * @param reg
-     * @return
-     */
-    public static int getCount(String string, String reg) {
+    //获取字符串重复次数
+    public static int getChildStrOccurNum(String originalStr, String childStr) {
         int count = 0;
-        for (int i = string.indexOf(reg); i < string.length(); i = string.indexOf(reg)) {
+        for (int i = originalStr.indexOf(childStr); i < originalStr.length(); i = originalStr.indexOf(childStr)) {
             if (i < 0) {
                 break;
             }
             count++;
-            string = string.substring(i + reg.length());
+            originalStr = originalStr.substring(i + childStr.length());
         }
         return count;
     }
 
-    public static String[] split(String string, String split) {
-        return split(string, split, 2);
-    }
+    //删除字符串中指定位置的子字符串
+    public static String removeChildStr(String orginalStr, String childStr, Position pos) {
+        String str = null;
+        int length = childStr.length();
+        switch (pos.getId()) {
+            case 1:
+                str = orginalStr.replaceAll(childStr, "");
+                break;
+            case 2:
+                if (orginalStr.startsWith(childStr)) {
+                    str = orginalStr.substring(length);
+                }
+                break;
+            case 3:
+                if (orginalStr.endsWith(childStr)) {
+                    str = orginalStr.substring(0, orginalStr.length() - length);
+                }
+                break;
+            case 4:
+                if (orginalStr.startsWith(childStr)) {
+                    orginalStr = orginalStr.substring(length);
+                }
+                if (orginalStr.endsWith(childStr)) {
+                    orginalStr = orginalStr.substring(0, orginalStr.length() - length);
+                }
+                str =orginalStr;
+                break;
+        }
 
-    private static String[] split(String str, String split, int i) {
-        return str.split(split, i);
+        return str;
     }
 
 }

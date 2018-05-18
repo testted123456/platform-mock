@@ -5,20 +5,16 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 
-
 @SpringBootApplication
 public class WebMockApplication extends SpringBootServletInitializer {
 
-    public static void main(String[] args) {
-        SpringApplication.run(WebMockApplication.class, args);
-    }
+	public static void main(String[] args) {
+		SpringApplication.run(WebMockApplication.class, args);
+	}
 
-    @Override
-    protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
-        // TODO Auto-generated method stub
-        builder.sources(this.getClass());
-        return super.configure(builder);
-
-    }
-
-    }
+	@Override
+	protected SpringApplicationBuilder configure(SpringApplicationBuilder builder){
+		builder.sources(this.getClass());
+		return super.configure(builder);
+	}
+}

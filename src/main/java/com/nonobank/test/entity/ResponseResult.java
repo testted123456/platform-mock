@@ -1,7 +1,7 @@
 package com.nonobank.test.entity;
 
 /**
- * Created by H.W. on 2018/4/11.
+ * Created by H.W. on 2018/4/25.
  */
 public class ResponseResult<T> {
 

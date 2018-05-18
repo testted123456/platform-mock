@@ -1,158 +1,78 @@
 package com.nonobank.test.api;
 
 import com.alibaba.fastjson.JSONObject;
-import com.nonobank.test.biz.AssembleResponse;
-import com.nonobank.test.biz.ProcessConfig;
-import com.nonobank.test.commons.MockException;
+import com.nonobank.test.common.ProcessBody;
+import com.nonobank.test.common.SaveInfo;
 import com.nonobank.test.entity.Code;
-import com.nonobank.test.entity.Config;
+import com.nonobank.test.entity.InterfaceInfo;
+import com.nonobank.test.entity.MockException;
 import com.nonobank.test.entity.ResponseResult;
-import com.nonobank.test.utils.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Created by H.W. on 2018/4/12.
+ * Created by H.W. on 2018/4/25.
  */
-
 @RestController
+@RequestMapping(value = "/mock")
 public class MockApi {
     private static Logger logger = LoggerFactory.getLogger(MockApi.class);
 
-    @Autowired
-    ProcessConfig processConfig;
-    @Autowired
-    Config config;
-    @Autowired
-    AssembleResponse assembleResponse;
-    private String env = "stb";
-    private String appName = null;
-    private String interName = null;
 
+    @Value("${prefixPath}")
+    private String prefixPath;
+    @Autowired
+    private SaveInfo saveInfo;
 
-    @RequestMapping(value = "/**")
-    public String assembleRes(HttpServletRequest servletRequest, HttpServletResponse response) {
-        String res = null;
-        String message = null;
-        int delayTime = 0;
-
+    @RequestMapping(value = "/setInterface", method = RequestMethod.POST)
+    public ResponseResult<String> writeInterface(@RequestBody String body) {
+        logger.info("准备写入接口信息" + body);
+        InterfaceInfo interfaceInfo = null;
         try {
-            if (!config.isEmpty()) {
-                processConfig.process(config, response);
-            }
-            res = assembleResponse.getMockResponse(servletRequest, response);
-
+            interfaceInfo = saveInfo.str2InterfaceInfo(body);
+            saveInfo.writeInterfaceInfo(prefixPath, interfaceInfo);
         } catch (MockException e) {
             e.printStackTrace();
-            String str = JSONObject.toJSONString(ResponseResult.error(Code.Res.UNKNOWN_ERROR, e.getMessage()));
-            return str;
+            return ResponseResult.error(Code.Res.VALID_ERROR, e.getMessage());
         }
-        return res;
+        logger.info("写入接口信息完成" + interfaceInfo.getUrl());
+
+        return ResponseResult.success(Code.Res.SUCCESS, interfaceInfo.getUrl() + "接口mock创建成功");
     }
 
-/*
-    public String getResponse(HttpServletRequest servletRequest) {
-        String result = null;
-        String reqBody = null;
-        String str = servletRequest.getRequestURI();
-        String reqType = servletRequest.getMethod();
-        if ("GET".equalsIgnoreCase(reqType)) {
-            XMap xMap = new XMap(servletRequest.getParameterMap());
-            reqBody = xMap.toJSON();
-        } else if ("POST".equalsIgnoreCase(reqType)) {
-            reqBody =assembleResponse.getBodyData(servletRequest);
-        }
-        String[] strings = PathUtil.splitBySlash(str);
-        if ("stb".equalsIgnoreCase(strings[0]) || "sit".equalsIgnoreCase(strings[0])) {
-            env = strings[0];
-            setMockInterinfo(strings[1]);
-        } else {
-            appName = strings[0];
-            interName = strings[1];
-        }
-        if (StringUtils.isEmpty(appName) || StringUtils.isEmpty(interName)) {
-            ResponseResult result1 = ResponseResult.error(Code.Res.VALID_ERROR, "未能解析到thirdName或interfaceName");
-            return JSONObject.toJSONString(result1);
-        }
-
-        String path = FileResource.getDirpath(env, appName, interName);
-        result = getResStrByPath(path, reqBody);
-        if (result == null) {
-            String originPath = FileResource.getDirpath("", appName, interName);
-            result = getResStrByPath(originPath, reqBody);
-            if (result == null) {
-                return reqBody;
-            } else {
-                try {
-                    copyFile(env,appName, interName);
-                } catch (MockException e) {
-                    e.printStackTrace();
-                    logger.info("复制文件" + originPath + "失败");
-                    return result;
-
-                }
-                return result;
-            }
-        } else {
-            return result;
-        }
-    }*/
-
-/*
-    private void setMockInterinfo(String string) {
+    @RequestMapping(value = "/getNodePath", method = RequestMethod.POST)
+    public ResponseResult<String> getNodePath(@RequestBody String json) {
+        Map<String,Object> target = new HashMap<>();
         try {
-            TwoTuple<String,String> tuple = PathUtil.getInterInfo(string);
-            appName = tuple.t;
-            interName = tuple.v;
+            ProcessBody.getOneDepthMap(json,target);
         } catch (MockException e) {
             e.printStackTrace();
+            return ResponseResult.error(Code.Res.VALID_ERROR, e.getMessage());
         }
-
-    }*/
-
-    /* private String getBodyData(HttpServletRequest request) {
-         StringBuffer data = new StringBuffer();
-         String line = null;
-         BufferedReader reader = null;
-         try {
-             reader = request.getReader();
-             while (null != (line = reader.readLine()))
-                 data.append(line);
-         } catch (IOException e) {
-         } finally {
-         }
-         return data.toString();
-     }
- */
-    private String getResStrByPath(String path, String reqBody) {
-        String result = null;
-        try {
-            result = FileResource.getResource(path);
-            if (result != null) {
-                //   MockInterInfo interfaceInfo = convert.transInterface(result,false);
-                //  String string = extract.getResponse(reqBody, interfaceInfo.getResponse().toJSONString(), interfaceInfo.getResType());
-                return "";
-            }
-        } catch (MockException e) {
-            e.printStackTrace();
-            ResponseResult result1 = ResponseResult.error(Code.Res.VALID_ERROR, e.getMessage());
-
-            return JSONObject.toJSONString(result1);
-
-        }
-        return result;
+        return ResponseResult.success(Code.Res.SUCCESS, JSONObject.toJSONString(target));
     }
 
 
+    @RequestMapping(value = "/setConfig",method =  RequestMethod.POST)
+    public ResponseResult<String> setConfig(@RequestBody String json) {
+        logger.info("设置配置请求"+json);
+        try {
+            saveInfo.writeConfig(json,prefixPath);
+        } catch (MockException |IOException e) {
+            e.printStackTrace();
+            return ResponseResult.error(Code.Res.UNKNOWN_ERROR,e.getMessage());
+        }
+        logger.info("配置设置成功");
+        return ResponseResult.success(Code.Res.SUCCESS,"配置设置成功");
+    }
 }
-
-
-
