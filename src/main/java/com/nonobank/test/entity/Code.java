@@ -4,10 +4,31 @@ package com.nonobank.test.entity;
  * Created by H.W. on 2018/4/24.
  */
 public interface Code {
-    public interface Res {
-        public static final String SUCCESS = "0000000";    //成功
-        public static final String UNKNOWN_ERROR = "9999999"; //未知错误
-        public static final String VALID_ERROR    ="0000007";//参数校验错误
+    enum ResultCode {
+        SUCCESS(10000, "成功"),
+        UNKOWN_ERROR(10001, "未知错误"),
+        VALIDATION_ERROR(10002, "对象校验失败"),
+        EMPTY_ERROR(10003, "对象为空"),
+        DB_ERROR(10004, "数据库操作错误"),
+        EXCEPTION_ERROR(10005, "发生异常"),
+        HTTP_ERROR(1006, "HTTP请求异常")
+        ;
+
+        private int code;
+        private String msg;
+
+        ResultCode(int code, String msg) {
+            this.code = code;
+            this.msg = msg;
+        }
+
+        public Integer getCode() {
+            return code;
+        }
+
+        public String getMsg() {
+            return msg;
+        }
     }
 
     public interface Valid{

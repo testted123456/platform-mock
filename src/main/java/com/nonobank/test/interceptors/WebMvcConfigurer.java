@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Created by H.W. on 2018/4/25.
  */
-@Component
+//@Component
 public class WebMvcConfigurer extends WebMvcConfigurerAdapter{
 
 

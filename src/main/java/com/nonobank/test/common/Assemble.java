@@ -1,6 +1,9 @@
 package com.nonobank.test.common;
 
 import com.alibaba.fastjson.JSONObject;
+import com.nonobank.test.DBResource.entity.MockInterfaceInfo;
+import com.nonobank.test.DBResource.service.InterfaceInfoService;
+import com.nonobank.test.DBResource.service.impl.InterfaceInfoServiceImpl;
 import com.nonobank.test.entity.*;
 import com.nonobank.test.utils.DataStruct;
 import com.nonobank.test.utils.FileUtil;
@@ -8,6 +11,7 @@ import com.nonobank.test.utils.StringUtils;
 import j.m.XMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -38,9 +42,14 @@ public class Assemble {
     private String contentType;
 
 
+    @Autowired
+    private InterfaceInfoServiceImpl interfaceInfoService;
+
+
     public String getRes(HttpServletRequest request, HttpServletResponse response, String distribute) throws MockException {
+      /*  String url = request.getRequestURI();
         parseServletRequest(request, distribute);
-        InterfaceInfo interfaceInfo = getMockInterFromFile();
+        InterfaceInfo interfaceInfo = interfaceInfoService.getMockInterfaceInfoByUrl();
         if (interfaceInfo == null) {
             response.setContentType(contentType);
             return requestStr;
@@ -60,7 +69,9 @@ public class Assemble {
         }
         response.setContentType("application/json");
 
-        return JSONObject.toJSONString(resObj);
+        return JSONObject.toJSONString(resObj);*/
+
+      return null;
 
 
     }

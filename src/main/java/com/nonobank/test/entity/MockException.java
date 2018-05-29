@@ -7,7 +7,11 @@ public class MockException extends Exception {
     public MockException() {
     }
 
-    public MockException(final String message) {
+    public MockException( String message) {
         super(message);
     }
+    public MockException(int errcode, String message) {
+        super(message);
+    }
+
 }

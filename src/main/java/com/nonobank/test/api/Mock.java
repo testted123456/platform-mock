@@ -1,19 +1,12 @@
 package com.nonobank.test.api;
 
-import com.alibaba.fastjson.JSON;
 import com.nonobank.test.common.Assemble;
-import com.nonobank.test.common.ProcessConfig;
 import com.nonobank.test.entity.Code;
-import com.nonobank.test.entity.Config;
 import com.nonobank.test.entity.MockException;
-import com.nonobank.test.entity.ResponseResult;
+import com.nonobank.test.entity.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,8 +24,8 @@ public class Mock {
     private static Logger logger = LoggerFactory.getLogger(Mock.class);
 
 
-    @Autowired
-    private Config config;
+   /* @Autowired
+    private Config config;*/
     @Autowired
     private Assemble assemble;
 
@@ -40,13 +33,13 @@ public class Mock {
     @RequestMapping(value = "/**")
     public void assemResponse(HttpServletRequest request, HttpServletResponse response) {
         PrintWriter writer = null;
-
+/*
         if (!config.isEmpty()) {
             try {
                 ProcessConfig.process(config, response);
             } catch (MockException e) {
                 e.printStackTrace();
-                ResponseResult result = ResponseResult.error(Code.Res.VALID_ERROR, e.getMessage());
+                Result result = Result.error(Code.Res.VALID_ERROR, e.getMessage());
                 writer.write(result.toString());
 
                 try {
@@ -60,7 +53,7 @@ public class Mock {
 
             }
             return;
-        }
+        }*/
         try {
 
             String res = assemble.getRes(request, response, "");
@@ -70,7 +63,7 @@ public class Mock {
 
         } catch (MockException | IOException e) {
             e.printStackTrace();
-            ResponseResult result = ResponseResult.error(Code.Res.VALID_ERROR, e.getMessage());
+            Result result = Result.error(Code.ResultCode.VALIDATION_ERROR.getCode(), e.getMessage());
             writer.write(request.toString());
         } finally {
             writer.flush();

@@ -1,13 +1,17 @@
 package com.nonobank.test.common;
 
-import com.nonobank.test.entity.Config;
+import com.alibaba.fastjson.JSONObject;
+import com.nonobank.test.DBResource.entity.Config;
 import com.nonobank.test.entity.MockException;
 import com.nonobank.test.utils.StringUtils;
+import j.Conf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Created by H.W. on 2018/4/25.
@@ -68,12 +72,22 @@ public class ProcessConfig {
         }
     }
 
-    public static void process(Config config, HttpServletResponse res) throws MockException {
-        if (config == null) {
-            return;
+
+    public static void process(String  str, HttpServletResponse res) throws MockException {
+        List<Config> configs = JSONObject.parseArray(str,Config.class);
+        if (configs != null && configs.size() > 0){
+            for (Config config:configs){
+                String key = config.getName();
+                if (key.equalsIgnoreCase("delayTime")){
+                    delayTime(config.getValue());
+                }
+                if (key.equalsIgnoreCase("errRate")){
+                    errorRate(res,config.getValue());
+                }
+                if (key.equalsIgnoreCase("httpCode")){
+                    httpCode(res,config.getValue());
+                }
+            }
         }
-        delayTime(config.getDelayTime());
-        httpCode(res, config.getHttpCode());
-        errorRate(res, config.getErrRate());
     }
 }

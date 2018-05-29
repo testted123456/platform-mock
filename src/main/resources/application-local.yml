@@ -1,0 +1,26 @@
+server:
+  port: 8080
+  context-path: /web-mock
+spring:
+  redis:
+    host: 192.168.1.46
+#    host: 127.0.0.1
+    port: 6379
+    timeout: 20000
+  session:
+    store-type: redis
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/platform?useUnicode=true&characterEncoding=utf-8
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  task:
+      pool:
+       corePoolSize: 10
+       maxPoolSize: 20
+       keepAliveSeconds: 120
+       queueCapacity: 10
