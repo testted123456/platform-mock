@@ -47,11 +47,12 @@ public class PathInfo {
 
     @Column(columnDefinition = "smallint(1) default 0 COMMENT '0:正常，1:已删除'")
     private Short status;
-    @Column(insertable = false, updatable = false, columnDefinition = "timestamp comment '创建时间' ")
+    @Column(insertable = false, updatable = false, columnDefinition = "datetime comment '创建时间' ")
     @Generated(GenerationTime.INSERT)
     LocalDateTime createTime;
     @Column(insertable = false, updatable = false
-            , columnDefinition = "timestamp  default current_timestamp comment '更新时间' ")
+            , columnDefinition = "datetime   comment '更新时间' ")
+    @Generated(GenerationTime.ALWAYS)
     LocalDateTime updateTime;
 
     public Long getId() {
