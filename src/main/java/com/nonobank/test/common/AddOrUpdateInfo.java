@@ -23,11 +23,8 @@ import java.util.Map;
 public class AddOrUpdateInfo {
     @Autowired
     private InterfaceInfoServiceImpl interfaceInfoService;
-
     @Autowired
     private PathInfoServiceImpl pathInfoService;
-
-
 
     public void operate(JSONObject  jsonObject) throws MockException {
 
