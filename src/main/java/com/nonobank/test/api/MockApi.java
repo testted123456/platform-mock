@@ -27,6 +27,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping(value = "/mock")
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class MockApi {
     private static Logger logger = LoggerFactory.getLogger(MockApi.class);
 
