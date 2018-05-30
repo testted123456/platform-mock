@@ -8,9 +8,11 @@ import j.Conf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import sun.jvm.hotspot.oops.ObjArrayKlass;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 /**
@@ -73,19 +75,22 @@ public class ProcessConfig {
     }
 
 
-    public static void process(String  str, HttpServletResponse res) throws MockException {
-        List<Config> configs = JSONObject.parseArray(str,Config.class);
-        if (configs != null && configs.size() > 0){
-            for (Config config:configs){
-                String key = config.getName();
-                if (key.equalsIgnoreCase("delayTime")){
-                    delayTime(config.getValue());
+    public static void process(Map<String, Object> configs, HttpServletResponse res) throws MockException {
+        if (configs != null && !configs.isEmpty()) {
+            for (Map.Entry<String, Object> config : configs.entrySet()) {
+                String key = config.getKey();
+                if (key.equalsIgnoreCase("delayTime")) {
+                    delayTime(String.valueOf(config.getValue()));
                 }
-                if (key.equalsIgnoreCase("errRate")){
-                    errorRate(res,config.getValue());
+                if (key.equalsIgnoreCase("errRate")) {
+                    errorRate(res, String.valueOf(config.getValue()));
                 }
-                if (key.equalsIgnoreCase("httpCode")){
-                    httpCode(res,config.getValue());
+                if (key.equalsIgnoreCase("httpCode")) {
+                    httpCode(res, String.valueOf(config.getValue()));
+                }
+                if (key.equalsIgnoreCase("ipMap")) {
+                    Map<String, Object> ipMap = JSONObject.parseObject((String) config.getValue());
+                    ProccessDistribute.setIpMap(ipMap);
                 }
             }
         }

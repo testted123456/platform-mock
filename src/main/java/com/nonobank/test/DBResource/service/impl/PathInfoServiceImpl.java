@@ -20,13 +20,6 @@ public class PathInfoServiceImpl implements PathInfoService {
     @Autowired
     private PathInfoRepostory repository;
 
-    public PathInfo getPathInfoByFullName(String fullName){
-        return repository.getPathInfoByFullName(fullName);
-    }
-
-    public PathInfo getPathInfoByCurrentName(String currentName){
-        return repository.getPathInfoByPathName(currentName);
-    }
 
 
     public List<PathInfo> findByPid(Long id){
@@ -41,8 +34,8 @@ public class PathInfoServiceImpl implements PathInfoService {
     @Override
     public PathInfo add(PathInfo pathInfo) throws MockException {
         if (pathInfo.getId() == null) {
-            String name = pathInfo.getPathName();
-            if (repository.getPathInfoByPathName(name) != null) {
+            String name = pathInfo.getName();
+            if (repository.getPathInfoByName(name) != null) {
                 throw new MockException(name + "目录已存在");
             }
         }

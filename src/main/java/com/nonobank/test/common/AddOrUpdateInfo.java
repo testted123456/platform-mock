@@ -1,13 +1,13 @@
 package com.nonobank.test.common;
 
 import com.alibaba.fastjson.JSONObject;
+import com.nonobank.test.DBResource.entity.Config;
 import com.nonobank.test.DBResource.entity.MockInterfaceInfo;
 import com.nonobank.test.DBResource.entity.PathInfo;
 import com.nonobank.test.DBResource.service.impl.InterfaceInfoServiceImpl;
 import com.nonobank.test.DBResource.service.impl.PathInfoServiceImpl;
 import com.nonobank.test.entity.MockException;
 import com.nonobank.test.entity.Type;
-import com.nonobank.test.entity.URI;
 import com.nonobank.test.utils.ArgsValid;
 import com.nonobank.test.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by H.W. on 2018/5/29.
@@ -26,52 +27,72 @@ public class AddOrUpdateInfo {
     @Autowired
     private PathInfoServiceImpl pathInfoService;
 
-    public void operate(JSONObject  jsonObject) throws MockException {
+    public void operate(JSONObject jsonObject) throws MockException {
 
         String pid = jsonObject.getString("pid");
         ArgsValid.notEmpty(pid, "父节点id");
 
-        Map<String,Integer> map = new HashMap();
-        map.put("id",Integer.valueOf(pid));
+        Map<String, Integer> map = new HashMap();
+        map.put("id", Integer.valueOf(pid));
         jsonObject.put("pathInfo", map);
 
         convertValue(jsonObject, "request");
         convertValue(jsonObject, "response");
         convertValue(jsonObject, "config");
-        convertValue(jsonObject,"resType");
+        convertValue(jsonObject, "resType");
         String json = jsonObject.toJSONString();
         MockInterfaceInfo info = JSONObject.parseObject(json, MockInterfaceInfo.class);
         valid(info);
         interfaceInfoService.add(info);
     }
+
     public void operate(PathInfo info) throws MockException {
         valid(info);
-        PathInfo prePathInfo = pathInfoService.getPathInfoById(info.getPid());
-        if (prePathInfo == null) {
-            throw new MockException("pid不存在");
+        PathInfo prePathInfo;
+        if (info.getPid() == 0) {
+            prePathInfo = new PathInfo();
+            prePathInfo.setFullName("");
+            //prePathInfo.setId(0l);
+        } else {
+            prePathInfo = pathInfoService.getPathInfoById(info.getPid());
         }
-        info.setFullName(prePathInfo.getFullName() + "/" + info.getPathName());
-        info.setPreviousName(prePathInfo.getPathName());
+        if (prePathInfo == null) {
+            throw new MockException("节点id" + info.getPid() + "不存在");
+        }
+        info.setFullName(prePathInfo.getFullName() + "/" + info.getName());
+        //info.setPid(prePathInfo.getId());
+        String config = info.getConfig();
+        if (!StringUtils.isEmpty(config)) {
+            Map<String, Object> configs = JSONObject.parseArray(config, Config.class).stream().collect(Collectors.toMap(Config::getName, Config::getValue,(key1, key2) -> key2));
+            config = JSONObject.toJSONString(configs);
+            info.setConfig(config);
+        }
+        if (info.getNeedProxy()) {
+            String ipMap = info.getIpMap();
+            if (!StringUtils.isEmpty(ipMap)) {
+                Map<String, Object> ipMaps = JSONObject.parseArray(config, Config.class).stream().collect(Collectors.toMap(Config::getName, Config::getValue,(key1, key2) -> key2));
+                ipMap = JSONObject.toJSONString(ipMaps);
+                info.setIpMap(ipMap);
+            }
+        }
         pathInfoService.add(info);
 
     }
 
 
-
-
-    private void valid(MockInterfaceInfo info){
-        ArgsValid.notNull(info,"请求");
-        ArgsValid.notEmpty(info.getName(),"接口名");
-        ArgsValid.notNull(info.getPathInfo(),"父节点");
-        ArgsValid.notEmpty(info.getUrl(),"接口全路径");
-        ArgsValid.notEmpty(info.getRequest(),"请求消息体");
-        ArgsValid.notEmpty(info.getRequest(),"响应消息体");
+    private void valid(MockInterfaceInfo info) {
+        ArgsValid.notNull(info, "请求");
+        ArgsValid.notEmpty(info.getName(), "接口名");
+        ArgsValid.notNull(info.getPathInfo(), "父节点");
+        ArgsValid.notEmpty(info.getUrl(), "接口全路径");
+        ArgsValid.notEmpty(info.getRequest(), "请求消息体");
+        ArgsValid.notEmpty(info.getRequest(), "响应消息体");
     }
 
-    private void valid(PathInfo info){
-        ArgsValid.notNull(info,"请求");
-        ArgsValid.notEmpty(info.getPathName(),"目录名称");
-        ArgsValid.notEmpty(String.valueOf(info.getPid()),"父节点id");
+    private void valid(PathInfo info) {
+        ArgsValid.notNull(info, "请求");
+        ArgsValid.notEmpty(info.getName(), "目录名称");
+        ArgsValid.notEmpty(String.valueOf(info.getPid()), "父节点id");
     }
 
 
@@ -89,15 +110,15 @@ public class AddOrUpdateInfo {
             return;
 
         }
-        if ("resType".equalsIgnoreCase(key)){
-            if (StringUtils.isEmpty(str)){
-                jsonObject.put(key,0);
+        if ("resType".equalsIgnoreCase(key)) {
+            if (StringUtils.isEmpty(str)) {
+                jsonObject.put(key, 0);
                 return;
-            }else {
-                if (str.toLowerCase().contains("xml")){
-                    jsonObject.put(key,1);
+            } else {
+                if (str.toLowerCase().contains("xml")) {
+                    jsonObject.put(key, 1);
                 }
-                jsonObject.put(key,0);
+                jsonObject.put(key, 0);
                 return;
             }
 

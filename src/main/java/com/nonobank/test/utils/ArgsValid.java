@@ -6,6 +6,7 @@ import com.nonobank.test.entity.ValidException;
 
 import javax.xml.bind.ValidationException;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Created by H.W. on 2018/5/29.
@@ -27,9 +28,25 @@ public class ArgsValid {
         }
     }
 
+    public static <T> T notEmpty(T arg, String filed) {
+        if (arg == null) {
+            throw new ValidException(filed + "为空");
+        } else {
+            return arg;
+        }
+    }
+
     public static <E, T extends Collection<E>> T notEmpty(T arg, String filed) {
         if (arg == null || arg.isEmpty()) {
             throw new ValidException(filed + "不能为空");
+        } else {
+            return arg;
+        }
+    }
+
+    public static <K, V, T extends Map<K, V>> T notEmpty(T arg, String filed) {
+        if (arg == null || arg.isEmpty()) {
+            throw new ValidException(filed + "为空");
         } else {
             return arg;
         }

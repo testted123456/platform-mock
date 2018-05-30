@@ -15,18 +15,18 @@ import java.util.List;
  */
 @Entity
 @Table(name = "mock_path_info")
-public class PathInfo {
+public class PathInfo  extends BaseInfo{
 
     @Id
     @GeneratedValue
     private Long id;
 
-    @Column(nullable = false, columnDefinition = "varchar(128) COMMENT '当前目录名' ")
-    private String pathName;
+    @Column(name = "pathName",nullable = false, columnDefinition = "varchar(128) COMMENT '当前目录名' ")
+    private String name;
     @Column(nullable = false, columnDefinition = "int COMMENT '父目录ID'")
     private Long pid;
-    @Column(nullable = false, columnDefinition = "varchar(128) COMMENT '父目录名' ")
-    private String previousName;
+    @Column(name = "previousName",nullable = false, columnDefinition = "varchar(128) COMMENT '父目录名' ")
+    private String pName;
 
     @Column(nullable = false, columnDefinition = "varchar(512) COMMENT '当前位置的全路径' ")
     private String fullName;
@@ -34,8 +34,8 @@ public class PathInfo {
     @Column(columnDefinition = "varchar(128) COMMENT '当前目录的配置项' ")
     private String config;
 
-    @Column(columnDefinition = "bit(1) default 0  COMMENT '是否需要转发,0:不需要，1:需要'")
-    private Boolean isProxy;
+    @Column(name = "isProxy",columnDefinition = "bit(1) default 0  COMMENT '是否需要转发,0:不需要，1:需要'")
+    private Boolean needProxy;
 
     @Column(columnDefinition = "varchar(512) COMMENT '转发ip键值对' ")
     private String ipMap;
@@ -63,13 +63,7 @@ public class PathInfo {
         this.id = id;
     }
 
-    public String getPathName() {
-        return pathName;
-    }
 
-    public void setPathName(String pathName) {
-        this.pathName = pathName;
-    }
 
     public Long getPid() {
         return pid;
@@ -79,13 +73,7 @@ public class PathInfo {
         this.pid = pid;
     }
 
-    public String getPreviousName() {
-        return previousName;
-    }
 
-    public void setPreviousName(String previousName) {
-        this.previousName = previousName;
-    }
 
     public String getFullName() {
         return fullName;
@@ -103,13 +91,6 @@ public class PathInfo {
         this.config = config;
     }
 
-    public Boolean getProxy() {
-        return isProxy;
-    }
-
-    public void setProxy(Boolean proxy) {
-        isProxy = proxy;
-    }
 
     public String getIpMap() {
         return ipMap;
@@ -149,5 +130,35 @@ public class PathInfo {
 
     public void setStatus(Short status) {
         this.status = status;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String getpName() {
+        return pName;
+    }
+
+    @Override
+    public void setpName(String pName) {
+        this.pName = pName;
+    }
+
+    @Override
+    public Boolean getNeedProxy() {
+        return needProxy;
+    }
+
+    @Override
+    public void setNeedProxy(Boolean needProxy) {
+        this.needProxy = needProxy;
     }
 }

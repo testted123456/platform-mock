@@ -10,7 +10,7 @@ import java.util.List;
  * Created by H.W. on 2018/5/24.
  */
 public interface PathInfoRepostory extends JpaRepository<PathInfo,Long> {
-    public PathInfo getPathInfoByPathName(String pathName);
+    public PathInfo getPathInfoByName(String pathName);
     public PathInfo getPathInfoByFullName(String fullName);
     public List<PathInfo>  findByPid(Long pid);
 }

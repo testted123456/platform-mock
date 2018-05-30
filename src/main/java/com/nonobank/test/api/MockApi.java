@@ -3,14 +3,10 @@ package com.nonobank.test.api;
 import com.alibaba.fastjson.JSONObject;
 import com.nonobank.test.DBResource.entity.MockInterfaceInfo;
 import com.nonobank.test.DBResource.entity.PathInfo;
-import com.nonobank.test.common.AcquireInfo;
-import com.nonobank.test.common.AddOrUpdateInfo;
-import com.nonobank.test.common.ProcessBody;
-import com.nonobank.test.common.SaveInfo;
+import com.nonobank.test.common.*;
 import com.nonobank.test.entity.Code;
 import com.nonobank.test.entity.MockException;
 import com.nonobank.test.entity.Result;
-import com.nonobank.test.utils.ArgsValid;
 import com.nonobank.test.utils.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +22,7 @@ import java.util.Map;
  * Created by H.W. on 2018/4/25.
  */
 @RestController
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RequestMapping(value = "/mock")
 public class MockApi {
     private static Logger logger = LoggerFactory.getLogger(MockApi.class);
@@ -33,13 +30,16 @@ public class MockApi {
 
     @Value("${prefixPath}")
     private String prefixPath;
-    @Autowired
-    private SaveInfo saveInfo;
+/*    @Autowired
+    private SaveInfo saveInfo;*/
     @Autowired
     private AcquireInfo acquireInfo;
 
     @Autowired
     private AddOrUpdateInfo addOrUpdateInfo;
+
+    @Autowired
+    private InitData initData;
 
 
     @RequestMapping(value = "/setInterface", method = RequestMethod.POST)
@@ -73,7 +73,7 @@ public class MockApi {
 
     @RequestMapping(value = "/getNodeList", method = RequestMethod.GET)
     public Result getNodeList(@RequestParam(value = "id", required = true) String id) {
-        String nodeList = acquireInfo.getNodeList(id);
+        String nodeList =null;// acquireInfo(id);
         return Result.success(nodeList);
     }
 
@@ -85,25 +85,17 @@ public class MockApi {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+    @RequestMapping(value = "/init", method = RequestMethod.GET)
+    public Result getInterfaceInfo() {
+         initData.initConfig();
+        return Result.success("");
+    }
 
     @RequestMapping(value = "/getNodePath", method = RequestMethod.POST)
     public Result getNodePath(@RequestBody String json) {
         Map<String, Object> target = new HashMap<>();
         try {
-            ProcessBody.getOneDepthMap(json, target);
+            ProccessDistribute.getOneDepthMap(json, target);
         } catch (MockException e) {
             e.printStackTrace();
             return Result.error(Code.ResultCode.VALIDATION_ERROR.getCode(), e.getMessage());
@@ -112,7 +104,7 @@ public class MockApi {
     }
 
 
-    @RequestMapping(value = "/setConfig", method = RequestMethod.POST)
+   /* @RequestMapping(value = "/setConfig", method = RequestMethod.POST)
     public Result setConfig(@RequestBody String json) {
         logger.info("设置配置请求" + json);
         try {
@@ -125,7 +117,7 @@ public class MockApi {
         return Result.success("配置设置成功");
     }
 
-
+*/
 
 
 /*    @RequestMapping(value = "/setPathInfo", method = RequestMethod.POST)
@@ -158,7 +150,7 @@ public class MockApi {
 
     }*/
 
-    @RequestMapping(value = "/setInterfaceOld", method = RequestMethod.POST)
+  /*  @RequestMapping(value = "/setInterfaceOld", method = RequestMethod.POST)
     public Result writeInterfaceOld(@RequestBody String body) {
         logger.info("准备写入接口信息" + body);
         MockInterfaceInfo interfaceInfo = null;
@@ -180,6 +172,6 @@ public class MockApi {
         logger.info("写入接口信息完成" + interfaceInfo.getUrl());
 
         return Result.success(interfaceInfo.getUrl() + "接口mock创建成功");
-    }
+    }*/
 
 }

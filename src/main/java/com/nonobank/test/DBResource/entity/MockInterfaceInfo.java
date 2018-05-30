@@ -17,7 +17,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "mock_interface_info")
-public class MockInterfaceInfo {
+public class MockInterfaceInfo  extends BaseInfo{
     @Id
     @GeneratedValue
     private Long id;
@@ -47,11 +47,40 @@ public class MockInterfaceInfo {
     private String config;
     @Column(columnDefinition = "int COMMENT '修改次数' ")
     private Integer version;
+    @Column(columnDefinition = "bit(1) default 0  COMMENT '是否需要转发,0:不需要，1:需要'")
+    private Boolean needProxy;
+    private Long pid;
+    private String pName;
+
+
+    @Override
+    public String getpName() {
+        return pName;
+    }
+
+    @Override
+    public void setpName(String pName) {
+        this.pName = this.getPathInfo().getName();
+    }
+
+    @Override
+    public Long getPid() {
+        return this.getPathInfo().getId();
+    }
+
+    @Override
+    public void setPid(Long pid) {
+        this.pid = this.getPathInfo().getId();
+    }
+
     @ManyToOne
     @JoinColumn(name = "path_Info_id")
     @JsonIgnore
     @Where(clause = "status != 1")
     private PathInfo pathInfo;
+
+
+
     @Column(columnDefinition = "smallint(1) default 0 COMMENT '0:正常，1:已删除'")
     private Short status;
     @Column(insertable = false, updatable = false, columnDefinition = "datetime comment '创建时间' ")
@@ -63,12 +92,24 @@ public class MockInterfaceInfo {
     @Generated(GenerationTime.ALWAYS)
     LocalDateTime updateTime;
 
+    @Override
     public Long getId() {
         return id;
     }
 
+    @Override
     public void setId(Long id) {
         this.id = id;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getUrl() {
@@ -127,14 +168,6 @@ public class MockInterfaceInfo {
         this.methodType = methodType;
     }
 
-    public Integer getVersion() {
-        return version;
-    }
-
-    public void setVersion(Integer version) {
-        this.version = version;
-    }
-
     public String getMatchRule() {
         return matchRule;
     }
@@ -143,12 +176,32 @@ public class MockInterfaceInfo {
         this.matchRule = matchRule;
     }
 
+    @Override
     public String getConfig() {
         return config;
     }
 
+    @Override
     public void setConfig(String config) {
         this.config = config;
+    }
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
+    }
+
+    @Override
+    public Boolean getNeedProxy() {
+        return needProxy;
+    }
+
+    @Override
+    public void setNeedProxy(Boolean needProxy) {
+        this.needProxy = needProxy;
     }
 
     public PathInfo getPathInfo() {
@@ -159,12 +212,12 @@ public class MockInterfaceInfo {
         this.pathInfo = pathInfo;
     }
 
-    public String getName() {
-        return name;
+    public Short getStatus() {
+        return status;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setStatus(Short status) {
+        this.status = status;
     }
 
     public LocalDateTime getCreateTime() {
@@ -181,13 +234,5 @@ public class MockInterfaceInfo {
 
     public void setUpdateTime(LocalDateTime updateTime) {
         this.updateTime = updateTime;
-    }
-
-    public Short getStatus() {
-        return status;
-    }
-
-    public void setStatus(Short status) {
-        this.status = status;
     }
 }
