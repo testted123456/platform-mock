@@ -4,18 +4,17 @@ import com.alibaba.fastjson.JSONObject;
 import com.nonobank.test.DBResource.entity.*;
 import com.nonobank.test.DBResource.service.impl.InterfaceInfoServiceImpl;
 import com.nonobank.test.DBResource.service.impl.PathInfoServiceImpl;
-import com.nonobank.test.entity.MockException;
-import com.nonobank.test.entity.Type;
-import com.nonobank.test.entity.ValidException;
+import com.nonobank.test.DBResource.entity.MockException;
+import com.nonobank.test.DBResource.entity.ValidException;
 import com.nonobank.test.utils.ArgsValid;
-import com.nonobank.test.utils.DataStruct;
-import com.nonobank.test.utils.StringUtils;
+import com.nonobank.test.utils.Convert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,93 +26,113 @@ import java.util.stream.Collectors;
 @Service
 public class AcquireInfo {
 
+    private Logger logger = LoggerFactory.getLogger(AcquireInfo.class);
 
     @Autowired
     private InterfaceInfoServiceImpl interfaceInfoService;
     @Autowired
-    private InitData initData;
+    private PathInfoServiceImpl pathInfoService;
     @Autowired
-    private ProccessDistribute proccessDistribute;
+    private PreserveConfig preserveConfig;
+    @Autowired
+    private ForwardRequest forwardRequest;
+
+    @Autowired
+    private ParseHttpServletRequest parseHttpServletRequest;
 
     private static final String XML_HEAD = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>";
 
 
-    public String getInterfaceInfo(String pid) {
-        ArgsValid.notEmpty(pid, "接口id");
-        Long id = Long.valueOf(pid);
-        MockInterfaceInfo info = interfaceInfoService.getMockInterfaceInfoById(id);
+    public String getNodeList(String id) {
+        ArgsValid.notEmpty(id, "节点Id");
+        Long nodeId = Long.valueOf(id);
+        BaseInfo baseInfo = new BaseInfo();
+        baseInfo.setId(nodeId);
+        baseInfo.setDirectory(true);
+        List<PathInfo> paths = pathInfoService.findByPid(nodeId);
+        List<MockInterfaceInfo> mocks = interfaceInfoService.findByPathInfoId(nodeId);
+        List<BaseInfo> infos = new ArrayList<>();
+        infos.addAll(paths.parallelStream().map(
+                pathInfo -> {
+                    pathInfo.setDirectory(true);
+                    return pathInfo;
+                }
+        ).collect(Collectors.toList()));
+        infos.addAll(mocks.parallelStream().map(
+                interfaceInfo -> {
+                    interfaceInfo.setDirectory(false);
+                    return interfaceInfo;
+                }
+        ).collect(Collectors.toList()));
+
+        baseInfo.getList().addAll(infos);
+        return JSONObject.toJSONString(baseInfo);
+    }
+
+
+    public Map<String, Object> transToSimpleMap(HttpServletRequest request, Map<String, Object> target) {
+        Map<String, Object> map = parseHttpServletRequest.getRequestBody(request);
+        Convert.sourceMapToSimpleMap(map, target, "");
+        return target;
+    }
+
+    public String getInterfaceInfo(String id) {
+        ArgsValid.notEmpty(id, "接口id");
+        MockInterfaceInfo info = interfaceInfoService.getMockInterfaceInfoById(Long.valueOf(id));
         return JSONObject.toJSONString(info);
     }
 
-    public String getMockInterfaceInfo(HttpServletRequest request, HttpServletResponse response) throws MockException, IOException {
-        String requsetBody = null;
-        String urlStr = request.getRequestURI().replaceFirst("/web-mock", "");
-        ArgsValid.notEmpty(urlStr, "接口全名");
-        MockInterfaceInfo info = interfaceInfoService.getMockInterfaceInfoByUrl(urlStr);
-        requsetBody = getRequestBody(request);
+    public String getResponse(HttpServletRequest request, HttpServletResponse response) throws MockException, IOException {
+        String mockFullName = request.getRequestURI().replaceFirst("/web-mock", "");
+        ArgsValid.notEmpty(mockFullName, "接口全路径");
+        MockInterfaceInfo info = interfaceInfoService.getMockInterfaceInfoByUrl(mockFullName);
         if (info == null) {
-            return requsetBody;
+            logger.info("接口" + mockFullName + "未查找到,返回请求消息体");
+            return parseHttpServletRequest.getResponse(request);
         }
-        Map<String, Object> configs = initData.getInterfaceInfoConfig(urlStr);
-        //undo 查看config的配置情况
+
+        Map<String, Object> configs = preserveConfig.getInterfaceInfoConfig(mockFullName);
         ProcessConfig.process(configs, response);
         if (info.getNeedProxy()) {
-            String disposeRes = proccessDistribute.disposeRes(request, response);
-            if (!disposeRes.equals("-1")) {
-                return disposeRes;
+            String forwardResponse = forwardRequest.forwardRequest(request, response);
+            if (!forwardResponse.equals("-1")) {
+                return forwardResponse;
+            } else {
+                throw new ValidException("未找到转发主机信息,请检查配置");
             }
         }
+
         String resStr = info.getResponse();
-        JSONObject resObj = JSONObject.parseObject(resStr);
-        fillDataByReq(resObj, JSONObject.parseObject(requsetBody));
-        //  if ("xml".equalsIgnoreCase(resType)) {
-        if (info.getResType() == 1) {
-            String str1 = JSONObject.toJSONString(resObj);
-            str1 = ProcessText.getSpecTypeStr(str1, Type.XML);
+        JSONObject responseMap = JSONObject.parseObject(resStr);
+
+        fillResponseByRequestData(responseMap, parseHttpServletRequest.getRequestBody(request));
+
+        if (needXmlResponse(info.getResType())) {
             response.setContentType("application/xml");
-            return XML_HEAD + "\n" + str1;
+            return xmlResponse(responseMap);
         }
         response.setContentType("application/json");
 
-        return JSONObject.toJSONString(resObj);
-
-        //todo response组装
+        return JSONObject.toJSONString(responseMap);
     }
 
-
-    public static String getRequestBody(HttpServletRequest request) {
-        String result = null;
-        String method = request.getMethod();
-        if (!StringUtils.isEmpty(method) && "POST".equalsIgnoreCase(method)) {
-            result = postReqBody(request);
-        } else if (!StringUtils.isEmpty(method) && "GET".equalsIgnoreCase(method)) {
-            result = JSONObject.toJSONString(request.getParameterMap());
-        } else {
-            throw new ValidException("请求不支持" + method + "类型");
-        }
-        return result;
+    private void fillResponseByRequestData(JSONObject responseMap, JSONObject requestMap) {
+        Map<String, Object> simpleMap = new HashMap<>();
+        Convert.sourceMapToSimpleMap(requestMap, simpleMap, "");
+        traversal(responseMap, simpleMap);
     }
 
-    private static String postReqBody(HttpServletRequest request) {
-        StringBuffer data = new StringBuffer();
-        String line = null;
-        BufferedReader reader = null;
-        try {
-            reader = request.getReader();
-            while (null != (line = reader.readLine()))
-                data.append(line);
-        } catch (IOException e) {
-        } finally {
-        }
-        return data.toString();
+    private boolean needXmlResponse(int i) {
+        return i == 1;
     }
 
+    private String xmlResponse(JSONObject responseMap) {
+        String response = JSONObject.toJSONString(responseMap);
+        response = parseHttpServletRequest.getSpecTypeStr(response, "xml");
+        return XML_HEAD + "\n" + response;
 
-    private void fillDataByReq(JSONObject resObj, JSONObject reqParams) {
-        Map<String, Object> oneDepth = new HashMap<>();
-        DataStruct.toOneDepth(reqParams, oneDepth, "");
-        traversal(resObj, oneDepth);
     }
+
     /**
      * 遍历response，构造响应数据
      *

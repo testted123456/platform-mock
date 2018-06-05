@@ -1,10 +1,7 @@
 package com.nonobank.test.utils;
 
-import com.nonobank.test.entity.Code;
-import com.nonobank.test.entity.MockException;
-import com.nonobank.test.entity.ValidException;
+import com.nonobank.test.DBResource.entity.ValidException;
 
-import javax.xml.bind.ValidationException;
 import java.util.Collection;
 import java.util.Map;
 

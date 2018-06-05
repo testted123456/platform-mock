@@ -24,11 +24,9 @@ public class MyAccessDecisionManager implements AccessDecisionManager {
     @Override
     public void decide(Authentication authentication, Object object, Collection<ConfigAttribute> configAttributes) throws AccessDeniedException, InsufficientAuthenticationException {
         String url = ((FilterInvocation) object).getRequestUrl();
-
-        if(((FilterInvocation) object).getRequest().getMethod().equals("OPTIONS")){
+        if (((FilterInvocation) object).getRequest().getMethod().equals("OPTIONS")) {
             return;
         }
-
         if (url != null && !url.startsWith("/mock")) {
             return;
         }

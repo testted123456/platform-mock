@@ -1,7 +1,7 @@
 package com.nonobank.test.DBResource.service;
 
 import com.nonobank.test.DBResource.entity.MockInterfaceInfo;
-import com.nonobank.test.entity.MockException;
+import com.nonobank.test.DBResource.entity.MockException;
 
 import java.util.List;
 
@@ -10,5 +10,6 @@ import java.util.List;
  */
 public interface InterfaceInfoService {
     public MockInterfaceInfo add(MockInterfaceInfo interfaceInfo) throws MockException;
+
     public List<MockInterfaceInfo> getAll();
 }

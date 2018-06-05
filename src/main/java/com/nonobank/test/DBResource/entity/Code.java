@@ -1,4 +1,4 @@
-package com.nonobank.test.entity;
+package com.nonobank.test.DBResource.entity;
 
 /**
  * Created by H.W. on 2018/4/24.
@@ -11,8 +11,7 @@ public interface Code {
         EMPTY_ERROR(10003, "对象为空"),
         DB_ERROR(10004, "数据库操作错误"),
         EXCEPTION_ERROR(10005, "发生异常"),
-        HTTP_ERROR(1006, "HTTP请求异常")
-        ;
+        HTTP_ERROR(1006, "HTTP请求异常");
 
         private int code;
         private String msg;
@@ -31,8 +30,8 @@ public interface Code {
         }
     }
 
-    public interface Valid{
-        public static final  String  IS_NULL = "param is null";
-        public static final  String  NOT_MATCH ="string is not json or xml";
+    public interface Valid {
+        public static final String IS_NULL = "param is null";
+        public static final String NOT_MATCH = "string is not json or xml";
     }
 }

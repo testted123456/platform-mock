@@ -1,11 +1,5 @@
 package com.nonobank.test.DBResource.entity;
 
-import org.hibernate.annotations.Generated;
-import org.hibernate.annotations.GenerationTime;
-import org.hibernate.validator.constraints.NotEmpty;
-
-import javax.persistence.*;
-import java.time.LocalDateTime;
 
 /**
  * Created by H.W. on 2018/5/23.

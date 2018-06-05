@@ -4,11 +4,10 @@ package com.nonobank.test.DBResource.service.impl;
 import com.nonobank.test.DBResource.entity.PathInfo;
 import com.nonobank.test.DBResource.repository.PathInfoRepostory;
 import com.nonobank.test.DBResource.service.PathInfoService;
-import com.nonobank.test.entity.MockException;
+import com.nonobank.test.DBResource.entity.ValidException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.nio.file.Path;
 import java.util.List;
 
 /**
@@ -21,22 +20,21 @@ public class PathInfoServiceImpl implements PathInfoService {
     private PathInfoRepostory repository;
 
 
-
-    public List<PathInfo> findByPid(Long id){
+    public List<PathInfo> findByPid(Long id) {
         return repository.findByPid(id);
     }
 
     @Override
-    public PathInfo getPathInfoById(Long id){
+    public PathInfo getPathInfoById(Long id) {
         return repository.findOne(id);
     }
 
     @Override
-    public PathInfo add(PathInfo pathInfo) throws MockException {
+    public PathInfo add(PathInfo pathInfo) {
         if (pathInfo.getId() == null) {
             String name = pathInfo.getName();
             if (repository.getPathInfoByName(name) != null) {
-                throw new MockException(name + "目录已存在");
+                throw new ValidException(name + "目录已存在");
             }
         }
         return repository.save(pathInfo);

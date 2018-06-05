@@ -4,11 +4,10 @@ package com.nonobank.test.DBResource.service.impl;
 import com.nonobank.test.DBResource.entity.MockInterfaceInfo;
 import com.nonobank.test.DBResource.repository.InterfaceInfoRepository;
 import com.nonobank.test.DBResource.service.InterfaceInfoService;
-import com.nonobank.test.entity.MockException;
+import com.nonobank.test.DBResource.entity.ValidException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import java.util.List;
 
 /**
@@ -20,11 +19,11 @@ public class InterfaceInfoServiceImpl implements InterfaceInfoService {
     private InterfaceInfoRepository repository;
 
     @Override
-    public MockInterfaceInfo add(MockInterfaceInfo interfaceInfo) throws MockException {
+    public MockInterfaceInfo add(MockInterfaceInfo interfaceInfo) {
         if (interfaceInfo.getId() == null) {
             String name = interfaceInfo.getUrl();
             if (repository.getMockInterfaceInfoByUrl(name) != null) {
-                throw new MockException("接口已存在");
+                throw new ValidException("接口已存在");
             }
         }
         return repository.save(interfaceInfo);

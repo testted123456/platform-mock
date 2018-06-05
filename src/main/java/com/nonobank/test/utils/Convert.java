@@ -6,18 +6,21 @@ import java.util.Map;
 /**
  * Created by H.W. on 2018/4/25.
  */
-public class DataStruct {
+
+
+public class Convert {
+
     private static final String SPLIT_POINT = ".";
     private static final String SPLIT_LIST_POINT = "@";
 
-    public static void toOneDepth(Map<String, Object> originalMap, Map<String, Object> oneDepthMap, String keyPrex) {
-        if (oneDepthMap == null || originalMap == null) {
+    public static void sourceMapToSimpleMap(Map<String, Object> sourceMap, Map<String, Object> simpleMap, String prexKey) {
+        if (simpleMap == null || sourceMap == null) {
             return;
         }
-        for (Map.Entry<String, Object> entry : originalMap.entrySet()) {
+        for (Map.Entry<String, Object> entry : sourceMap.entrySet()) {
             String key = entry.getKey();
             Object obj = entry.getValue();
-            String tempKey = keyPrex;
+            String tempKey = prexKey;
             if (obj instanceof Map) {
                 if (StringUtils.isEmpty(tempKey)) {
                     tempKey = key.concat(SPLIT_POINT);
@@ -25,7 +28,7 @@ public class DataStruct {
                     tempKey = tempKey.concat(key).concat(SPLIT_POINT);
                 }
                 Map<String, Object> map = (Map<String, Object>) obj;
-                toOneDepth(map, oneDepthMap, tempKey);
+                sourceMapToSimpleMap(map, simpleMap, tempKey);
             } else if (obj instanceof List) {
                 if (StringUtils.isEmpty(tempKey)) {
                     tempKey = key.concat(SPLIT_POINT).concat(SPLIT_LIST_POINT);
@@ -33,35 +36,35 @@ public class DataStruct {
                     tempKey = tempKey.concat(key).concat(SPLIT_POINT).concat(SPLIT_LIST_POINT);
                 }
                 List list = (List) obj;
-                toOneDepth(list, oneDepthMap, tempKey);
+                sourceMapToSimpleMap(list, simpleMap, tempKey);
             } else {
                 if (StringUtils.isEmpty(tempKey)) {
-                    oneDepthMap.put(key, obj);
+                    simpleMap.put(key, obj);
                 } else {
-                    oneDepthMap.put(tempKey.concat(key), obj);
+                    simpleMap.put(tempKey.concat(key), obj);
                 }
             }
         }
     }
 
-    private static void toOneDepth(List<Object> list, Map<String, Object> oneDepthMap, String keyPrex) {
+    private static void sourceMapToSimpleMap(List<Object> list, Map<String, Object> simpleMap, String prexKey) {
         if (list == null) {
             return;
         }
         int length = list.size();
         for (int i = 0; i < length; i++) {
-            String tempKey = keyPrex;
+            String tempKey = prexKey;
             Object obj = list.get(i);
             if (obj instanceof Map) {
                 tempKey = tempKey.concat(String.valueOf(i)).concat(SPLIT_POINT);
                 Map<String, Object> map = (Map<String, Object>) obj;
-                toOneDepth(map, oneDepthMap, tempKey);
+                sourceMapToSimpleMap(map, simpleMap, tempKey);
             } else if (obj instanceof List) {
                 tempKey = tempKey.concat(String.valueOf(i)).concat(SPLIT_POINT).concat(SPLIT_LIST_POINT);
-                List<Object> list1 = (List<Object>) obj;
-                toOneDepth(list1, oneDepthMap, tempKey);
+                List<Object> templist = (List<Object>) obj;
+                sourceMapToSimpleMap(templist, simpleMap, tempKey);
             } else {
-                oneDepthMap.put(tempKey.concat(String.valueOf(i)), obj);
+                simpleMap.put(tempKey.concat(String.valueOf(i)), obj);
             }
         }
     }

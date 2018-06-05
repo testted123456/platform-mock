@@ -1,4 +1,4 @@
-package com.nonobank.test.entity;
+package com.nonobank.test.DBResource.entity;
 
 /**
  * Created by H.W. on 2018/4/25.

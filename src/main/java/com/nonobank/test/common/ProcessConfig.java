@@ -1,19 +1,13 @@
 package com.nonobank.test.common;
 
 import com.alibaba.fastjson.JSONObject;
-import com.nonobank.test.DBResource.entity.Config;
-import com.nonobank.test.entity.MockException;
+import com.nonobank.test.DBResource.entity.MockException;
 import com.nonobank.test.utils.StringUtils;
-import j.Conf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-import sun.jvm.hotspot.oops.ObjArrayKlass;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 
 /**
  * Created by H.W. on 2018/4/25.
@@ -23,6 +17,26 @@ import java.util.function.Predicate;
 public class ProcessConfig {
     private static Logger logger = LoggerFactory.getLogger(ProcessConfig.class);
 
+    public static void process(Map<String, Object> configs, HttpServletResponse res) throws MockException {
+        if (configs != null && !configs.isEmpty()) {
+            for (Map.Entry<String, Object> config : configs.entrySet()) {
+                String key = config.getKey();
+                if (key.equalsIgnoreCase("delayTime")) {
+                    delayTime(String.valueOf(config.getValue()));
+                }
+                if (key.equalsIgnoreCase("errRate")) {
+                    errorRate(res, String.valueOf(config.getValue()));
+                }
+                if (key.equalsIgnoreCase("httpCode")) {
+                    httpCode(res, String.valueOf(config.getValue()));
+                }
+                if (key.equalsIgnoreCase("ipMap")) {
+                    Map<String, Object> ipMap = JSONObject.parseObject((String) config.getValue());
+                    ForwardRequest.setIpMap(ipMap);
+                }
+            }
+        }
+    }
 
     private static void delayTime(String delayTime) throws MockException {
         try {
@@ -75,24 +89,4 @@ public class ProcessConfig {
     }
 
 
-    public static void process(Map<String, Object> configs, HttpServletResponse res) throws MockException {
-        if (configs != null && !configs.isEmpty()) {
-            for (Map.Entry<String, Object> config : configs.entrySet()) {
-                String key = config.getKey();
-                if (key.equalsIgnoreCase("delayTime")) {
-                    delayTime(String.valueOf(config.getValue()));
-                }
-                if (key.equalsIgnoreCase("errRate")) {
-                    errorRate(res, String.valueOf(config.getValue()));
-                }
-                if (key.equalsIgnoreCase("httpCode")) {
-                    httpCode(res, String.valueOf(config.getValue()));
-                }
-                if (key.equalsIgnoreCase("ipMap")) {
-                    Map<String, Object> ipMap = JSONObject.parseObject((String) config.getValue());
-                    ProccessDistribute.setIpMap(ipMap);
-                }
-            }
-        }
-    }
 }

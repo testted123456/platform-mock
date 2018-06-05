@@ -1,8 +1,9 @@
-package com.nonobank.test.entity;
+package com.nonobank.test.utils;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
+import com.nonobank.test.DBResource.entity.MockException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;

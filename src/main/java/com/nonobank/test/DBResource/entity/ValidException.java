@@ -1,4 +1,4 @@
-package com.nonobank.test.entity;
+package com.nonobank.test.DBResource.entity;
 
 /**
  * Created by H.W. on 2018/5/29.
@@ -6,7 +6,7 @@ package com.nonobank.test.entity;
 public class ValidException extends RuntimeException {
     private Code.ResultCode resultCode;
 
-    public ValidException(String message){
+    public ValidException(String message) {
         super(message);
         this.resultCode = Code.ResultCode.VALIDATION_ERROR;
     }

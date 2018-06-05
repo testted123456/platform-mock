@@ -2,6 +2,7 @@ package com.nonobank.test.DBResource.entity;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.data.annotation.Transient;
 
 /**
  * Created by H.W. on 2018/5/30.
@@ -12,10 +13,11 @@ public class BaseInfo {
     private Long pid;
     private String pName;
     private Boolean needProxy;
+    @Transient
     private String ipMap;
     private String config;
     private boolean directory;
-    private List<BaseInfo> children = new ArrayList<>();
+    private List<BaseInfo> list;
 
     public static BaseInfo createRoot() {
         BaseInfo root = new BaseInfo();
@@ -23,8 +25,16 @@ public class BaseInfo {
         return root;
     }
 
-    public List<BaseInfo> getChildren() {
-        return children;
+    public List<BaseInfo> getList() {
+        if (list == null) {
+            list = new ArrayList<>();
+        }
+        return list;
+    }
+
+    public void setList(List<BaseInfo> list) {
+
+        this.list = list;
     }
 
     public Long getId() {

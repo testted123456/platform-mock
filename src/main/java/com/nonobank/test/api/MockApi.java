@@ -4,9 +4,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.nonobank.test.DBResource.entity.MockInterfaceInfo;
 import com.nonobank.test.DBResource.entity.PathInfo;
 import com.nonobank.test.common.*;
-import com.nonobank.test.entity.Code;
-import com.nonobank.test.entity.MockException;
-import com.nonobank.test.entity.Result;
+import com.nonobank.test.DBResource.entity.Code;
+import com.nonobank.test.DBResource.entity.Result;
 import com.nonobank.test.utils.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,42 +29,46 @@ public class MockApi {
 
     @Value("${prefixPath}")
     private String prefixPath;
-/*    @Autowired
-    private SaveInfo saveInfo;*/
+    /*    @Autowired
+        private SaveInfo saveInfo;*/
     @Autowired
     private AcquireInfo acquireInfo;
 
     @Autowired
-    private AddOrUpdateInfo addOrUpdateInfo;
+    private InterfaceOperate interfaceOperate;
 
     @Autowired
-    private InitData initData;
+    private DirectoryOperate directoryOperate;
+    /* @Autowired
+     private NodeOperation nodeOperation;
+ */
+    @Autowired
+    private PreserveConfig preserveConfig;
 
 
     @RequestMapping(value = "/setInterface", method = RequestMethod.POST)
     public Result writeInterface(@RequestBody String body) {
         logger.info("准备写入接口信息" + body);
         JSONObject jsonObject = JSONObject.parseObject(body);
-
-        try {
-            addOrUpdateInfo.operate(jsonObject);
-        } catch (MockException e) {
-            e.printStackTrace();
-            Result.error(Code.ResultCode.UNKOWN_ERROR.getCode(), e.getMessage());
+        MockInterfaceInfo info = interfaceOperate.operate(jsonObject);
+        if (info != null) {
+            return Result.success(JSONObject.toJSONString(info));
         }
-        return Result.success("接口mock创建成功");
+        //nodeOperation.createMockInterface(jsonObject);
+        return Result.error(Code.ResultCode.UNKOWN_ERROR.getCode(), "接口设置失败");
+
     }
 
     @RequestMapping(value = "/setPathInfo", method = RequestMethod.POST)
     public Result setPathInfo(@RequestBody String json) {
-        logger.info("设置接口路径" + json);
+        logger.info("设置目录" + json);
         PathInfo pathInfo = JSONObject.parseObject(json, PathInfo.class);
-        try {
-            addOrUpdateInfo.operate(pathInfo);
-        } catch (MockException e) {
-            e.printStackTrace();
-            return Result.error(Code.ResultCode.UNKOWN_ERROR.getCode(), e.getMessage());
+
+        boolean flag = directoryOperate.operate(pathInfo);
+        if (!flag) {
+            return Result.error(Code.ResultCode.UNKOWN_ERROR.getCode(), "目录设置失败");
         }
+
 
         return Result.success(JSONObject.toJSONString(pathInfo));
     }
@@ -73,7 +76,7 @@ public class MockApi {
 
     @RequestMapping(value = "/getNodeList", method = RequestMethod.GET)
     public Result getNodeList(@RequestParam(value = "id", required = true) String id) {
-        String nodeList =null;// acquireInfo(id);
+        String nodeList = acquireInfo.getNodeList(id);// acquireInfo(id);
         return Result.success(nodeList);
     }
 
@@ -84,22 +87,29 @@ public class MockApi {
     }
 
 
+    @RequestMapping(value = "/getConfigList", method = RequestMethod.GET)
+    public Result getNodeConfig(@RequestParam(value = "type") String type) {
+        boolean flag = false;
+        if (!StringUtils.isEmpty(type)) {
+            if (type.equalsIgnoreCase("dict")) {
+                flag = true;
+            }
+        }
+        String response = null;
+        if (flag) {
+            response = JSONObject.toJSONString(preserveConfig.getDictConfigList());
+        } else {
+            response = JSONObject.toJSONString(preserveConfig.getInterfaceConfigList());
+        }
 
-    @RequestMapping(value = "/init", method = RequestMethod.GET)
-    public Result getInterfaceInfo() {
-         initData.initConfig();
-        return Result.success("");
+        //preserveBaseInfo.initConfig();
+        return Result.success(response);
     }
 
-    @RequestMapping(value = "/getNodePath", method = RequestMethod.POST)
-    public Result getNodePath(@RequestBody String json) {
+    @RequestMapping(value = "/getRequestMap", method = RequestMethod.POST)
+    public Result getNodePath(HttpServletRequest request) {
         Map<String, Object> target = new HashMap<>();
-        try {
-            ProccessDistribute.getOneDepthMap(json, target);
-        } catch (MockException e) {
-            e.printStackTrace();
-            return Result.error(Code.ResultCode.VALIDATION_ERROR.getCode(), e.getMessage());
-        }
+        target = acquireInfo.transToSimpleMap(request, target);
         return Result.success(JSONObject.toJSONString(target));
     }
 

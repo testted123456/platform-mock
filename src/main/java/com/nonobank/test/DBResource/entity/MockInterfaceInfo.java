@@ -5,19 +5,21 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.Generated;
 import org.hibernate.annotations.GenerationTime;
 import org.hibernate.annotations.Where;
+import org.springframework.data.annotation.*;
 
 import javax.persistence.*;
+import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * Created by H.W. on 2018/5/23.
  */
 
 @Entity
+
 @Table(name = "mock_interface_info")
-public class MockInterfaceInfo  extends BaseInfo{
+public class MockInterfaceInfo extends BaseInfo {
     @Id
     @GeneratedValue
     private Long id;
@@ -25,9 +27,9 @@ public class MockInterfaceInfo  extends BaseInfo{
     @Column(name = "interfaceName", nullable = false, columnDefinition = "varchar(255) COMMENT '被mock接口名称'")
     private String name;
     @NotNull(message = "接口全路径不能为空")
-    @Column(name = "fullName", nullable = false, columnDefinition = "varchar(255) COMMENT '被mock接口的全路径'")
+    @Column(name = "fullName", nullable = false, columnDefinition = "varchar(255) COMMENT '被mock接口的全路径'", unique = true)
     private String url;
-    @Column(columnDefinition = " smallint(1) default 0 COMMENT '0:application/json,1:application/xml' ")
+    @Column(name = "resType", columnDefinition = " smallint(1) default 0 COMMENT '0:application/json,1:application/xml' ")
     private Integer resType;
     @NotNull(message = "接口请求消息不能为空")
     @Column(nullable = false, columnDefinition = "varchar(2000) COMMENT '接口请求消息内容'")
@@ -49,7 +51,7 @@ public class MockInterfaceInfo  extends BaseInfo{
     private Integer version;
     @Column(columnDefinition = "bit(1) default 0  COMMENT '是否需要转发,0:不需要，1:需要'")
     private Boolean needProxy;
-    private Long pid;
+    @org.springframework.data.annotation.Transient
     private String pName;
 
 
@@ -62,7 +64,7 @@ public class MockInterfaceInfo  extends BaseInfo{
     public void setpName(String pName) {
         this.pName = this.getPathInfo().getName();
     }
-
+/*
     @Override
     public Long getPid() {
         return this.getPathInfo().getId();
@@ -71,14 +73,13 @@ public class MockInterfaceInfo  extends BaseInfo{
     @Override
     public void setPid(Long pid) {
         this.pid = this.getPathInfo().getId();
-    }
+    }*/
 
     @ManyToOne
     @JoinColumn(name = "path_Info_id")
     @JsonIgnore
     @Where(clause = "status != 1")
     private PathInfo pathInfo;
-
 
 
     @Column(columnDefinition = "smallint(1) default 0 COMMENT '0:正常，1:已删除'")
@@ -235,4 +236,6 @@ public class MockInterfaceInfo  extends BaseInfo{
     public void setUpdateTime(LocalDateTime updateTime) {
         this.updateTime = updateTime;
     }
+
+
 }

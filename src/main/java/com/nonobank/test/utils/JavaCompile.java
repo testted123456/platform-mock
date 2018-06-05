@@ -25,12 +25,13 @@ public class JavaCompile {
         this.compiler = ToolProvider.getSystemJavaCompiler();
         this.stdManager = compiler.getStandardFileManager(null, null, null);
     }
-    public Map<String,byte[]> compile(String filename,String source) throws IOException {
-        try (MemoryJavaFileManager manager = new MemoryJavaFileManager(stdManager)){
+
+    public Map<String, byte[]> compile(String filename, String source) throws IOException {
+        try (MemoryJavaFileManager manager = new MemoryJavaFileManager(stdManager)) {
             JavaFileObject javaFileObject = manager.makeStringSource(filename, source);
-            JavaCompiler.CompilationTask task = compiler.getTask(null,manager,null,null,null, Arrays.asList(javaFileObject));
+            JavaCompiler.CompilationTask task = compiler.getTask(null, manager, null, null, null, Arrays.asList(javaFileObject));
             Boolean result = task.call();
-            if (result==null||!result.booleanValue()){
+            if (result == null || !result.booleanValue()) {
                 throw new RuntimeException("Compilation failed");
             }
             return manager.getClassBytes();
@@ -44,7 +45,7 @@ public class JavaCompile {
     }
 
     public static void main(String[] args) throws Exception {
-        String classStr ="package com.nonobank.test.utils;\n" +
+        String classStr = "package com.nonobank.test.utils;\n" +
                 "public class User implements U {\n" +
                 "\n" +
                 "\tprivate String id;\n" +
@@ -78,11 +79,11 @@ public class JavaCompile {
                 "}";
 
         JavaCompile compile = new JavaCompile();
-        Map<String,byte[]> result = compile.compile("User.java",classStr);
-        Class<?> clazz = compile.loadClass("com.nonobank.test.utils.User",result);
-        U obj = (U)clazz.newInstance();
-        Method setId = clazz.getMethod("setId",String.class);
-        setId.invoke(obj,"test");
+        Map<String, byte[]> result = compile.compile("User.java", classStr);
+        Class<?> clazz = compile.loadClass("com.nonobank.test.utils.User", result);
+        U obj = (U) clazz.newInstance();
+        Method setId = clazz.getMethod("setId", String.class);
+        setId.invoke(obj, "test");
         System.out.println(obj.getId());
     }
 }
