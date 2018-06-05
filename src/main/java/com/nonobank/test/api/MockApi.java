@@ -21,8 +21,8 @@ import java.util.Map;
  * Created by H.W. on 2018/4/25.
  */
 @RestController
-@CrossOrigin(origins = "*", maxAge = 3600)
 @RequestMapping(value = "/mock")
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class MockApi {
     private static Logger logger = LoggerFactory.getLogger(MockApi.class);
 
